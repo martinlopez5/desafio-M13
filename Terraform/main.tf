@@ -1,52 +1,45 @@
-# Configuración del proveedor AWS
+# Configura el proveedor AWS
 provider "aws" {
-  region = var.aws_region
 }
 
-# Recurso VPC
+# Crea una VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = var.vpc_cidr_block
 }
 
-# Subnet pública
+# Crea una Subnet Pública
 resource "aws_subnet" "public_subnet" {
-  vpc_id     = aws_vpc.my_vpc.id
-  cidr_block = var.vpc_cidr_block
-  availability_zone = var.availability_zone_public
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = var.public_subnet_cidr_block
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
 }
 
-# Subnet privada
+# Crea una Subnet Privada
 resource "aws_subnet" "private_subnet" {
-  vpc_id     = aws_vpc.my_vpc.id
-  cidr_block = var.vpc_cidr_block
-  availability_zone = var.availability_zone_private
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = var.private_subnet_cidr_block
+  availability_zone       = "us-east-1b"
 }
 
-# Grupo de seguridad
-resource "aws_security_group" "my_security_group" {
-  name        = "my-security-group"
-  description = "My Security Group"
+# Crea una instancia EC2 en la Subnet Pública
+resource "aws_instance" "backend_instance" {
+  ami             = "ami-0c55b159cbfafe1f0"  # Debes reemplazar esto con la AMI de Ubuntu
+  instance_type   = "t2.micro"
+  key_name        = var.aws_key_name
+  subnet_id       = aws_subnet.public_subnet.id
 
-  # Regla para permitir el acceso SSH desde una dirección IP específica
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.allowed_ssh_ip]
-  }
+# Configuración del volumen EBS
+root_block_device {
+  volume_type           = "gp2"
+  volume_size           = 8  # Tamaño del volumen en GB
+  delete_on_termination = true
 
-  # Agrega más reglas según sea necesario
+  # Puedes personalizar más opciones según tus necesidades
+}
 }
 
-# Instancia EC2
-resource "aws_instance" "my_instance" {
-  ami           = var.ec2_ami # AMI de Ubuntu 20.04 en us-east-1
-  instance_type = var.instance_type
-
-  subnet_id          = aws_subnet.public_subnet.id
-  security_groups    = [aws_security_group.my_security_group.name]
-  associate_public_ip_address = true
-
-  # Puedes agregar más configuraciones de instancia según tus necesidades
+# Output para obtener la IP pública de la instancia
+output "backend_instance_public_ip" {
+  value = aws_instance.backend_instance.public_ip
 }
