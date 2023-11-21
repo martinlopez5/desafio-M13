@@ -1,3 +1,6 @@
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+
 variable "aws_key_name" {
   description = "Nombre de la clave EC2"
   type        = string
