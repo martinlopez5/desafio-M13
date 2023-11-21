@@ -1,4 +1,4 @@
 EC2-instances:
   hosts:
-    AWS-webserver:
-      ansible-host:
+    #IP-EC2-Instance:
+      ansible-host: #Name-EC2-Instance
