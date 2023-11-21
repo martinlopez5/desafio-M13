@@ -1,3 +1,7 @@
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_key_name"   {}
+
 # Crea una VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
